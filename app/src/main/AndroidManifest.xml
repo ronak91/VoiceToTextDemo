@@ -16,13 +16,20 @@
 
 
 
-        <activity android:name=".QuationAnsActivity">
+        <activity android:name=".MainActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.View" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".QuationAnsActivity" android:screenOrientation="portrait" />
+
+        <activity android:name=".SpeechToTextActivity" android:screenOrientation="portrait" />
+
+        <activity android:name=".VoiceRecgnizationActivity"  android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>

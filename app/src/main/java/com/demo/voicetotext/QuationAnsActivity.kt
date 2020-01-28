@@ -25,7 +25,7 @@ import kotlinx.android.synthetic.main.activity_quationans.*
 import java.util.*
 
 
-class QuationAnsActivity : AppCompatActivity() {
+class QuationAnsActivity : BaseActivity() {
 
     private var textToSpeech: TextToSpeech? = null
     val RequestPermissionCode = 1
@@ -102,7 +102,7 @@ class QuationAnsActivity : AppCompatActivity() {
             })
 
 
-        answer.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
+        answer1.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
             when (motionEvent.action) {
                 MotionEvent.ACTION_UP -> {
                     mSpeechRecognizer.stopListening()
@@ -117,20 +117,25 @@ class QuationAnsActivity : AppCompatActivity() {
             false
         })
 
-        button_speak.setOnClickListener {
-            val data = quation.text.toString()
-            Log.i("TTS", "button clicked: $data")
+        button_answer1.setOnClickListener {
+            mSpeechRecognizer.startListening(mSpeechRecognizerIntent)
+            editText1.setText("")
+            editText1.hint = "Listening..."
+        }
 
-            val params = HashMap<String, String>()
-            params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "myname"
+        button_done1.setOnClickListener {
+            mSpeechRecognizer.stopListening()
+            editText1.hint = "You will see input here"
+        }
 
-            val speechStatus = textToSpeech!!.speak(data, TextToSpeech.QUEUE_FLUSH, params)
+        button_speak1.setOnClickListener {
+            val data = quation1.text.toString()
+            SpeakText(data)
+        }
 
-            if (speechStatus == TextToSpeech.ERROR) {
-                Log.e("TTS", "Error in converting Text to Speech!")
-            } else {
-                toast("Speech Success")
-            }
+        button_speak2.setOnClickListener {
+            val data = quation2.text.toString()
+            SpeakText(data)
         }
 
 
@@ -154,6 +159,22 @@ class QuationAnsActivity : AppCompatActivity() {
 
     }
 
+
+
+    fun SpeakText(data: String) {
+        Log.i("TTS", "button clicked: $data")
+
+        val params = HashMap<String, String>()
+        params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "myname"
+
+        val speechStatus = textToSpeech!!.speak(data, TextToSpeech.QUEUE_FLUSH, params)
+
+        if (speechStatus == TextToSpeech.ERROR) {
+            Log.e("TTS", "Error in converting Text to Speech!")
+        } else {
+            toast("Speech Success")
+        }
+    }
 
     fun close(){
         Handler().postDelayed({
