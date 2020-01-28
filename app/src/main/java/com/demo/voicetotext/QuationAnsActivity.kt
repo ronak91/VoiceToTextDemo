@@ -18,9 +18,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.demo.voicetotext.Speech.SpeechRecognizerManager
+import com.demo.voicetotext.Speech.SpeechRecognizerManager.onResultsReady
 import kotlinx.android.synthetic.main.activity_quationans.*
 import java.util.*
 
@@ -31,6 +32,8 @@ class QuationAnsActivity : BaseActivity() {
     val RequestPermissionCode = 1
 
     val mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+
+    private var mSpeechManager: SpeechRecognizerManager? = null
 
 
     val mSpeechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
@@ -134,8 +137,33 @@ class QuationAnsActivity : BaseActivity() {
         }
 
         button_speak2.setOnClickListener {
-            val data = quation2.text.toString()
-            SpeakText(data)
+            var GenderArray = ""
+            if (mSpeechManager == null) {
+                GenderArray =  getSpeechResponse()
+            } else if (!mSpeechManager!!.ismIsListening()) {
+                mSpeechManager!!.destroy()
+                GenderArray =  getSpeechResponse()
+            }
+
+            val menu = arrayOfNulls<String>(GenderArray.length)
+
+            for (i in GenderArray) {
+                if (i.equals("Male")){
+                        genderGroup.check(R.id.male)
+                        mSpeechManager!!.destroy()
+                        return@setOnClickListener
+                } else if(i.equals("Female")){
+                        genderGroup.check(R.id.female)
+                        mSpeechManager!!.destroy()
+                         return@setOnClickListener
+                } else if(i.equals("Other")){
+                        genderGroup.check(R.id.other)
+                        mSpeechManager!!.destroy()
+                        return@setOnClickListener
+                }
+            }
+
+
         }
 
 
@@ -212,6 +240,64 @@ class QuationAnsActivity : BaseActivity() {
                 Manifest.permission.RECORD_AUDIO
             ), RequestPermissionCode
         )
+    }
+
+    fun getSpeechResponse(): String {
+        var finalText = ""
+        mSpeechManager = SpeechRecognizerManager(this,
+            onResultsReady { results ->
+                var results = results
+                if (results != null && results.size > 0) {
+
+                    val sb = StringBuilder()
+                    if (results.size > 5) {
+                        results = results.subList(0, 5) as ArrayList<String>
+                    }
+
+                    for (result in results) {
+                        sb.append(result).append(",")
+                    }
+
+                    finalText = sb.toString()
+
+                }  // else result_tv.setText(getString(R.string.no_results_found))
+
+            })
+        return finalText
+    }
+
+
+    private fun SetSpeechListener(): String {
+        mSpeechManager = SpeechRecognizerManager(this,
+            onResultsReady { results ->
+                var results = results
+                if (results != null && results.size > 0) {
+                    if (results.size == 1) {
+                        mSpeechManager!!.destroy()
+                        mSpeechManager = null
+                        //   result_tv.setText(results[0])
+                    } else {
+                        val sb = StringBuilder()
+                        if (results.size > 5) {
+                            results = results.subList(0, 5) as ArrayList<String>
+                        }
+                        for (result in results) {
+                            sb.append(result).append("\n")
+                        }
+                        //     result_tv.setText(sb.toString())
+                    }
+                } else "" //result_tv.setText(getString(R.string.no_results_found))
+            })
+        return ""
+    }
+
+
+    override fun onPause() {
+        if (mSpeechManager != null) {
+            mSpeechManager!!.destroy()
+            mSpeechManager = null
+        }
+        super.onPause()
     }
 
 }
